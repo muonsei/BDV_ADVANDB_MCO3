@@ -1,4 +1,4 @@
-# Welcome
+# Welcome, human
 Henlo! Use Eclipse IDE to import the project.
 
 ## FXML IDs
