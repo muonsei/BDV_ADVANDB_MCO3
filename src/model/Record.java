@@ -34,11 +34,11 @@ public class Record {
 		this.country = country;
 	}
 	
-	public int getYear() {
+	public String getYear() {
 		return year;
 	}
 	
-	public void setYear(int year) {
+	public void setYear(String year) {
 		this.year = year;
 	}
 	
@@ -53,6 +53,14 @@ public class Record {
 	private int id;
 	private String region;
 	private String country;
-	private int year;
+	private String year;
 	private double value;
+	
+	
+	public static final String TABLE = "mco_data";
+	public static final String COL_ID = "id";
+	public static final String COL_REGION = "Region";
+	public static final String COL_COUNTRY = "CountryName";
+	public static final String COL_YEAR = "YearC";
+	public static final String COL_DATA = "MortalityRateOfFemale";
 }

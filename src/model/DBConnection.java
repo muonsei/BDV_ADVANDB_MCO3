@@ -53,6 +53,11 @@ public class DBConnection
         }
     }
 
+	public void setNull(int p) throws SQLException
+    {
+        preparedStatement.setNull(p, Types.INTEGER);
+    }
+	
     public void setInt(int p, int x) throws SQLException
     {
         preparedStatement.setInt(p, x);
