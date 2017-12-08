@@ -10,7 +10,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.141">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
   <tabs>
     <Tab text="Select">
       <content>
@@ -42,7 +42,7 @@
                      </content>
                   </ScrollPane>
                   <TextArea fx:id="insertQuery" layoutY="163.0" prefHeight="102.0" prefWidth="300.0" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="234.0" />
-                  <Button fx:id="insertButtonQuery" layoutX="219.0" layoutY="336.0" mnemonicParsing="false" text="Execute Query" AnchorPane.bottomAnchor="10.0" />
+                  <Button fx:id="insertButtonExecute" layoutX="219.0" layoutY="336.0" mnemonicParsing="false" text="Execute Query" AnchorPane.bottomAnchor="10.0" />
                </children></AnchorPane>
       </content>
     </Tab>
