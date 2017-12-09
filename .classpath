@@ -2,11 +2,11 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="btm-2.1.0.jar"/>
-	<classpathentry kind="lib" path="geronimo-jta_1.1_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="mysql-connector-java-5.1.10.jar"/>
-	<classpathentry kind="lib" path="mysql-connector-java-5.1.45-bin.jar"/>
-	<classpathentry kind="lib" path="slf4j-api-1.5.10.jar"/>
-	<classpathentry kind="lib" path="slf4j-jdk14-1.5.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ruby/Desktop/Advandb/ADVANDB/btm-2.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ruby/Desktop/Advandb/ADVANDB/geronimo-jta_1.1_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ruby/Desktop/Advandb/ADVANDB/mysql-connector-java-5.1.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ruby/Desktop/Advandb/ADVANDB/slf4j-api-1.5.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ruby/Desktop/Advandb/ADVANDB/slf4j-jdk14-1.5.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ruby/Desktop/Advandb/ADVANDB/javax.transaction.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

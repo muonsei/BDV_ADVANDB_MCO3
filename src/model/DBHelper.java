@@ -1,21 +1,35 @@
 package model;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
+
+import javax.transaction.Status;
+
+import bitronix.tm.BitronixTransactionManager;
+import bitronix.tm.TransactionManagerServices;
+import javafx.animation.KeyValue.Type;
 
 public class DBHelper {
 
-	private final String DB_NAME = "advandb_mco3";
-	private final String USERNAME = "root";
-	private final String PASSWORD = "1234";
+	private BitronixTransactionManager btm;
 
-	private DBConnection connection;
+	public DBHelper(BitronixTransactionManager btm) {
 
-	public DBHelper() {
-		connection = new DBConnection();
-		connection.setConnection(DB_NAME, USERNAME, PASSWORD);
-		this.connection = DBConnection.getInstance();
+		this.btm = btm;
+		/*---------From CodeProject.com START---------
+		 PoolingDataSource mySQLDS = new PoolingDataSource();
+		 mySQLDS.setClassName("com.mysql.jdbc.jdbc2.optional.MysqlXADataSource");
+		 mySQLDS.setUniqueName("mySqlBtm");
+		 mySQLDS.setMaxPoolSize(3);
+		 mySQLDS.getDriverProperties().setProperty("databaseName", DB_NAME);
+		 mySQLDS.init();
+		 ---------From CodeProject.com END---------*/
+		//btm = TransactionManagerServices.getTransactionManager();
 	}
 
 	private Record toRecord(ResultSet rs) throws SQLException {
@@ -31,130 +45,235 @@ public class DBHelper {
 	}
 
 	// TODO Select all distinct regions
-	public ArrayList<String> getAllRegions() {
+	public ArrayList<String> getAllRegions(Connection connection) {
 		ArrayList<String> regions = new ArrayList<>();
 
 		String query = "SELECT DISTINCT " + Record.COL_REGION
-				+ " FROM " + Record.TABLE;
+				+ " FROM " + Record.TABLE_AR;
 
 		try {
-			ResultSet rs = connection.executeQuery(query);
+			//while(btm.getStatus()==Status.STATUS_ACTIVE);
+			btm.begin();
+			PreparedStatement statement = connection.prepareStatement(query);
+			ResultSet rs = statement.executeQuery();
 
 			while (rs.next()) {
 				regions.add(rs.getString(Record.COL_REGION));
 			}
 
 			rs.close();
-
-			System.out.println("[REGIONS] SELECT SUCCESS!");
-		} catch (SQLException e) {
-			e.printStackTrace();
-			System.out.println("[REGIONS] SELECT FAILED!");
-			return null;
+			statement.close();
+			connection.close();
+			btm.commit();
+			
+			System.out.println("[COUNTRY] SELECT SUCCESS!");
+		} catch (SQLException ev) {
+			ev.printStackTrace();
+			btm.shutdown();
+			System.out.println("[COUNTRY] SELECT FAILED!");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				btm.shutdown();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+			}
 		}
-
+		//btm.shutdown();
 		return regions;
 	}
 
 	// TODO Select one region only
-	public ArrayList<Record> getAllCountryRowByRegion(String region) {
+	public ArrayList<Record> getAllCountryRowByRegion(Connection connection, String region) {
 		ArrayList<Record> countrieRows = new ArrayList<>();
 
-		String query = "SELECT * \n"
-				+ "FROM " + Record.TABLE
-				+ "\nWHERE " + Record.COL_REGION +" = \"" + region + "\"";
+		String query = "SELECT * "
+				+ " FROM " + Record.TABLE_AR
+				+ " WHERE " + Record.COL_REGION + " = \"" + region + "\"";
 
 		try {
-			ResultSet rs = connection.executeQuery(query);
+			//while(btm.getStatus()==Status.STATUS_ACTIVE);
+			btm.begin();
+			
+			PreparedStatement statement = connection.prepareStatement(query);
+			ResultSet rs = statement.executeQuery();
 
 			while (rs.next()) {
 				countrieRows.add(toRecord(rs));
 			}
 
 			rs.close();
+			statement.close();
+			connection.close();
+			
+			btm.commit();
 
 			System.out.println("[COUNTRY] SELECT SUCCESS!");
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (SQLException ev) {
+			ev.printStackTrace();
+			btm.shutdown();
 			System.out.println("[COUNTRY] SELECT FAILED!");
-			return null;
+			//btm.shutdown();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				btm.shutdown();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+			}
 		}
-
 		return countrieRows;
 	}
 
 	// TODO Insert
-	public boolean addRecord(Record record) {
-		String query = 	"INSERT INTO " + Record.TABLE + 
-						" VALUES (?, ?, ?, ?, ?)";
-		
+	public boolean addRecord(Connection connection, Record record, String table) {
+		String query = "INSERT INTO " + table
+				+ " VALUES (?, ?, ?, ?, ?)";
+
 		try {
-			connection.prepareStatement(query);
-			
-			connection.setNull(1);
-			connection.setString(2, record.getRegion());
-			connection.setString(3, record.getCountry());
-			connection.setString(4, record.getYear());
-			connection.setDouble(5, record.getValue());
-			
-			connection.executeUpdate();
-			connection.closePreparedStatement();
-			
+			/*---------TRANSACTION MANAGER STUFF START---------*/
+			btm.begin();
+
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setNull(1, Types.INTEGER);
+			statement.setString(2, record.getRegion());
+			statement.setString(3, record.getCountry());
+			statement.setString(4, record.getYear());
+			statement.setDouble(5, record.getValue());
+
+			statement.executeUpdate();
+
+			//connection.closePreparedStatement();
+			statement.close();
+			connection.close();
+
+			btm.commit();
+			/*---------TRANSACTION MANAGER STUFF END---------*/
+
 			System.out.println("[RECORD] INSERT SUCCESS!");
 			return true;
 		} catch (SQLException ev) {
 			ev.printStackTrace();
+			btm.shutdown();
 			System.out.println("[RECORD] INSERT FAILED!");
-		}	
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				btm.shutdown();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+			}
+		}
 		return false;
 	}
-	
+
 	// TODO Update
-	public void updateRecord(Record record) {
+	public boolean updateRecord(Connection connection, Record record, String table) {
 		try {
-			String query = 	"UPDATE " + Record.TABLE +
-							" SET " + Record.COL_REGION + " = ?, " +
-							Record.COL_COUNTRY + " = ?, " + 
-							Record.COL_YEAR + " = ?, " +
-							Record.COL_DATA + " = ? " +
-							" WHERE " + Record.COL_ID + " = ?";
-			
-			connection.prepareStatement(query);
-			
-			connection.setString(1, record.getRegion());
-			connection.setString(2, record.getCountry());
-			connection.setString(3, record.getYear());
-			connection.setDouble(4, record.getValue());
-			connection.setInt(5, record.getId());
-			
-			connection.executeUpdate();
-			connection.closePreparedStatement();
-			
+			String query = "UPDATE " + table
+					+ " SET " + Record.COL_DATA + " = ? "
+					+ " WHERE " + Record.COL_COUNTRY + " = ? AND "
+					+ Record.COL_YEAR + " = ? AND "
+					+ Record.COL_REGION + " = ? ";
+
+			/*---------TRANSACTION MANAGER STUFF START---------*/
+			btm.begin();
+
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setDouble(1, record.getValue());
+			statement.setString(2, record.getCountry());
+			statement.setString(3, record.getYear());
+			statement.setString(4, record.getRegion());
+
+			statement.executeUpdate();
+
+			//connection.closePreparedStatement();
+			statement.close();
+			connection.close();
+
+			btm.commit();
+			/*---------TRANSACTION MANAGER STUFF END---------*/
+
 			System.out.println("[RECORD] UPDATE SUCCESS! ");
+			return true;
 		} catch (SQLException ev) {
 			ev.printStackTrace();
-			System.out.println("[RECORD] UPDATE FAILED! ");
+			btm.shutdown();
+			System.out.println("[RECORD] UPDATE FAILED!");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				btm.shutdown();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+			}
 		}
+		return false;
 	}
-	
+
 	// TODO Delete
-	public void deleteRecord(int id) {
-		String query = 	"DELETE FROM " + 
-						Record.TABLE +
-						" WHERE " + Record.COL_ID + " = ?";
-		
+	public boolean deleteRecord(Connection connection, Record record, String table) {
+		String query = "DELETE FROM " + table
+				+ " WHERE " + Record.COL_COUNTRY + " = ? AND "
+				+ Record.COL_YEAR + " = ? AND "
+				+ Record.COL_REGION + " = ? AND "
+				+ Record.COL_DATA + " = ? ";
+
 		try {
-			connection.prepareStatement(query);
+			/*---------TRANSACTION MANAGER STUFF START---------*/
+			btm.begin();
+
+			PreparedStatement statement = connection.prepareStatement(query);
 			
-			connection.setInt(1, id);
-			
-			connection.executeUpdate();
-			connection.closePreparedStatement();
-			
+			statement.setString(1, record.getCountry());
+			statement.setString(2, record.getYear());
+			statement.setString(3, record.getRegion());
+			statement.setDouble(4, record.getValue());
+
+
+			statement.executeUpdate();
+
+			//connection.closePreparedStatement();
+			statement.close();
+			connection.close();
+
+			btm.commit();
+			/*---------TRANSACTION MANAGER STUFF END---------*/
+
 			System.out.println("[RECORD] DELETE SUCCESS!");
+			return true;
 		} catch (SQLException ev) {
-			System.out.println("[RECORD] DELETE FAILED!");
 			ev.printStackTrace();
-		}	
+			btm.shutdown();
+			System.out.println("[RECORD] DELETE FAILED!");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+				btm.shutdown();
+			}
+		}
+		return false;
 	}
 }

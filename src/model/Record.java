@@ -57,7 +57,9 @@ public class Record {
 	private double value;
 	
 	
-	public static final String TABLE = "mco_data";
+	public static final String TABLE_AR = "ar";
+	public static final String TABLE_EA = "ea";
+	public static final String TABLE_AA = "aa";
 	public static final String COL_ID = "id";
 	public static final String COL_REGION = "Region";
 	public static final String COL_COUNTRY = "CountryName";
