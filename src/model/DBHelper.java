@@ -132,6 +132,52 @@ public class DBHelper {
 		}
 		return countrieRows;
 	}
+	
+	// TODO Select date by country
+	public ArrayList<String> getAllYearRowByCountry(Connection connection, String country) {
+		ArrayList<String> years = new ArrayList<>();
+
+		String query = "SELECT DISTINCT " + Record.COL_YEAR
+				+ " FROM " + Record.TABLE_AR
+				+ " WHERE " + Record.COL_COUNTRY + " = \"" + country + "\"";
+
+		try {
+			//while(btm.getStatus()==Status.STATUS_ACTIVE);
+			btm.begin();
+			
+			PreparedStatement statement = connection.prepareStatement(query);
+			ResultSet rs = statement.executeQuery();
+
+			while (rs.next()) {
+				years.add(toRecord(rs.getString(Record.COL_YEAR)));
+			}
+
+			rs.close();
+			statement.close();
+			connection.close();
+			
+			btm.commit();
+
+			System.out.println("[COUNTRY] SELECT SUCCESS!");
+		} catch (SQLException ev) {
+			ev.printStackTrace();
+			btm.shutdown();
+			System.out.println("[COUNTRY] SELECT FAILED!");
+			//btm.shutdown();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				btm.shutdown();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+			}
+		}
+		return years;
+	}
 
 	// TODO Insert
 	public boolean addRecord(Connection connection, Record record, String table) {

@@ -10,7 +10,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -26,24 +28,35 @@ public class MainController extends Controller {
     }
 	
 	@FXML
-    private Button selectButtonGenerate, selectButtonExecute, 
-    insertButtonGenerate, insertButtonExecute,
-    updateButtonGenerate, updateButtonExecute,
-    deleteButtonDelete;
-	
-	@FXML
-	private ComboBox selectRegion, insertRegion, updateRegion, insertCountry, updateCountry;
-	
-	@FXML
-	private TextArea selectQuery, insertQuery, updateQuery;
-	
-	@FXML
-	private TextField insertValue, updateID, updateYear, updateValue;
-	
-	@FXML
-	private TableView selectTableview, insertTableview, updateTableview, deleteTableview;
+	RadioButton radioSelect1, radioInsert1, radioUpdate1, radioDelete1, 
+		radioSelect2, radioInsert2, radioUpdate2, radioDelete2;
 
+	@FXML
+	ComboBox comboSelectRegion1, comboInsertRegion1, comboInsertCountry1, 
+		comboUpdateRegion1, comboUpdateCountry1, comboUpdateYear1, 
+		comboDeleteRegion1, comboDeleteCountry1, comboDeleteYear1, 
+		comboSelectRegion2, comboInsertRegion2, comboInsertCountry2, 
+		comboUpdateRegion2, comboUpdateCountry2, comboUpdateYear2, 
+		comboDeleteRegion2, comboDeleteCountry2, comboDeleteYear2;
 	
+	@FXML
+	TextField textfieldInsertYear1, textfieldInsertValue1, textfieldUpdateValue1,
+		textfieldDeleteValue1, textfieldInsertYear2, textfieldInsertValue2,
+		textfieldUpdateValue2, textfieldDeleteValue2;
+	
+	@FXML
+	Button buttonRefreshTable, buttonGenerateQueries, buttonLocalRun, buttonGlobalRun;
+	
+	@FXML
+	CheckBox checkboxTransaction1, checkboxTransaction2;
+	
+	@FXML
+	TextArea textareaTransaction1, textareaTransaction2;
+	
+	@FXML
+	TableView tableview;
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void load() throws ViewManagerException {
 		// TODO Auto-generated method stub
@@ -52,11 +65,17 @@ public class MainController extends Controller {
 			// TODO retrieve all regions, populate selectRegion/insertRegion/updateRegion
 			ObservableList<String> regions = FXCollections.observableArrayList(decider.getAllRegions());
 			// TODO add listener to selectRegion/insertRegion/updateRegion to populate 
-			selectRegion.setItems(regions);
-			insertRegion.setItems(regions);
-			updateRegion.setItems(regions);
+			comboSelectRegion1.setItems(regions);
+			comboInsertRegion1.setItems(regions);
+			comboUpdateRegion1.setItems(regions);
+			comboDeleteRegion1.setItems(regions);
+			comboSelectRegion2.setItems(regions);
+			comboInsertRegion2.setItems(regions);
+			comboUpdateRegion2.setItems(regions);
+			comboDeleteRegion2.setItems(regions);
 
-			insertRegion.valueProperty().addListener(new ChangeListener<String>() {
+			// INSERT - REGION (TRANSACTION 1)
+			comboInsertRegion1.valueProperty().addListener(new ChangeListener<String>() {
 
 				@Override
 				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -66,12 +85,29 @@ public class MainController extends Controller {
 						countries.add(records.get(i).getCountry());
 					}
 					ObservableList<String> country = FXCollections.observableArrayList(countries);
-					insertCountry.setItems(country);
+					comboInsertCountry1.setItems(country);
+				}
+
+			});
+
+			// INSERT - REGION (TRANSACTION 2)
+			comboInsertRegion2.valueProperty().addListener(new ChangeListener<String>() {
+
+				@Override
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+					ArrayList<Record> records = decider.getAllCountryRowByRegion(newValue);
+					ArrayList<String> countries = new ArrayList<>();
+					for (int i = 0; i < records.size(); ++i) {
+						countries.add(records.get(i).getCountry());
+					}
+					ObservableList<String> country = FXCollections.observableArrayList(countries);
+					comboInsertCountry2.setItems(country);
 				}
 
 			});
 			
-			updateRegion.valueProperty().addListener(new ChangeListener<String>() {
+			// UPDATE - REGION (TRANSACTION 1)
+			comboUpdateRegion1.valueProperty().addListener(new ChangeListener<String>() {
 
 				@Override
 				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -81,45 +117,78 @@ public class MainController extends Controller {
 						countries.add(records.get(i).getCountry());
 					}
 					ObservableList<String> country = FXCollections.observableArrayList(countries);
-					updateCountry.setItems(country);
+					comboUpdateCountry1.setItems(country);
 				}
 
 			});
+			
+			// UPDATE - REGION (TRANSACTION 2)
+			comboUpdateRegion2.valueProperty().addListener(new ChangeListener<String>() {
+
+				@Override
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+					ArrayList<Record> records = decider.getAllCountryRowByRegion(newValue);
+					ArrayList<String> countries = new ArrayList<>();
+					for (int i = 0; i < records.size(); ++i) {
+						countries.add(records.get(i).getCountry());
+					}
+					ObservableList<String> country = FXCollections.observableArrayList(countries);
+					comboUpdateCountry2.setItems(country);
+				}
+
+			});
+			
+			// DELETE - REGION (TRANSACTION 1)
+			comboDeleteRegion1.valueProperty().addListener(new ChangeListener<String>() {
+
+				@Override
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+					ArrayList<Record> records = decider.getAllCountryRowByRegion(newValue);
+					ArrayList<String> countries = new ArrayList<>();
+					for (int i = 0; i < records.size(); ++i) {
+						countries.add(records.get(i).getCountry());
+					}
+					ObservableList<String> country = FXCollections.observableArrayList(countries);
+					comboDeleteCountry1.setItems(country);
+				}
+
+			});
+			
+			// DELETE - REGION (TRANSACTION 2)
+			comboDeleteRegion2.valueProperty().addListener(new ChangeListener<String>() {
+
+				@Override
+				public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+					ArrayList<Record> records = decider.getAllCountryRowByRegion(newValue);
+					ArrayList<String> countries = new ArrayList<>();
+					for (int i = 0; i < records.size(); ++i) {
+						countries.add(records.get(i).getCountry());
+					}
+					ObservableList<String> country = FXCollections.observableArrayList(countries);
+					comboDeleteCountry2.setItems(country);
+				}
+
+			});
+			
+			// TODO add listener to country to retrieve year
 			
 			// TODO generate query (select) handler
-			selectButtonGenerate.addEventHandler(ActionEvent.ACTION, e -> {
+			buttonGenerateQueries.addEventHandler(ActionEvent.ACTION, e -> {
 				
 			});
 			
-			
-			// TODO execute query (select) handler
-			selectButtonExecute.addEventHandler(ActionEvent.ACTION, e -> {
+			// TODO generate refresh handler
+			buttonRefreshTable.addEventHandler(ActionEvent.ACTION, e -> {
+				
+			});
+
+			// TODO local run handler
+			buttonLocalRun.addEventHandler(ActionEvent.ACTION, e -> {
 				
 			});
 			
-			
-			// TODO generate query (insert) handler
-			insertButtonGenerate.addEventHandler(ActionEvent.ACTION, e -> {
-				
-			});
-			
-			// TODO execute query (insert) handler
-			insertButtonExecute.addEventHandler(ActionEvent.ACTION, e -> {
-				
-			});
-			
-			// TODO generate query (update) handler
-			updateButtonGenerate.addEventHandler(ActionEvent.ACTION, e -> {
-				
-			});
-			
-			// TODO execute query (update) handler
-			updateButtonExecute.addEventHandler(ActionEvent.ACTION, e -> {
-				
-			});
-			
-			// TODO execute query (delete) handler
-			deleteButtonDelete.addEventHandler(ActionEvent.ACTION, e -> {
+			// TODO local run handler
+			buttonGlobalRun.addEventHandler(ActionEvent.ACTION, e -> {
 				
 			});
 			
