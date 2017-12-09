@@ -276,4 +276,51 @@ public class DBHelper {
 		}
 		return false;
 	}
+	
+	public void rollback(Connection connection, Record record, String table){
+		String query = "TRUNCATE " + table
+				+ " WHERE " + Record.COL_COUNTRY + " = ? AND "
+				+ Record.COL_YEAR + " = ? AND "
+				+ Record.COL_REGION + " = ? AND "
+				+ Record.COL_DATA + " = ? ";
+		
+		try {
+			/*---------TRANSACTION MANAGER STUFF START---------*/
+			btm.begin();
+
+			PreparedStatement statement = connection.prepareStatement(query);
+			
+			statement.setString(1, record.getCountry());
+			statement.setString(2, record.getYear());
+			statement.setString(3, record.getRegion());
+			statement.setDouble(4, record.getValue());
+
+
+			statement.executeUpdate();
+
+			//connection.closePreparedStatement();
+			statement.close();
+			connection.close();
+
+			btm.commit();
+			/*---------TRANSACTION MANAGER STUFF END---------*/
+
+			System.out.println("[RECORD] ROLLBACK SUCCESS!");
+		} catch (SQLException ev) {
+			ev.printStackTrace();
+			btm.shutdown();
+			System.out.println("[RECORD] ROLLBACK FAILED!");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			btm.shutdown();
+			System.out.println("[BTM] SYSTEM EXCEPTION");
+			try {
+				btm.rollback();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("[BTM] ROLLBACK FAILURE");
+				btm.shutdown();
+			}
+		}
+	}
 }
